@@ -8,8 +8,14 @@
         <TextView
             android:id="@+id/today_name_text"
             android:text="Svátek"
+            android:textSize="24pt"
             android:gravity="center"
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
+        <Button
+            android:id="@+id/change_date"
+            android:layout_width="500px"
+            android:layout_height="200px"
+            android:text="Random"/>
 
 </FrameLayout>

@@ -1,4 +1,8 @@
 package com.example.svatecnik.model
 
-class NameObject {
-}
+import java.util.*
+
+data class NameObject (
+    val date: String,
+    val name: String,
+)
