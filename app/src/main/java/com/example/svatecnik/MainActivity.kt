@@ -1,35 +1,36 @@
 package com.example.svatecnik
 
-import androidx.appcompat.app.AppCompatActivity
+import android.content.Context
 import android.os.Bundle
-import android.util.Log
-import androidx.activity.viewModels
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.preferencesDataStore
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.example.svatecnik.repository.Repository
+import com.example.svatecnik.utils.Constants.Companion.FAVOURITE_NAME_KEY
 import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.android.synthetic.main.fragment_home.*
 
 class MainActivity : AppCompatActivity() {
 
+    private lateinit var viewModel: MainViewModel
     private val homeFragment = HomeFragment()
     private val alarmsFragment = AlarmsFragment()
-    private lateinit var viewModel: MainViewModel;
+    private val dataStore: DataStore<Preferences> by preferencesDataStore(FAVOURITE_NAME_KEY)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         val repository = Repository()
-        val viewModelFactory = MainViewModelFactory(repository)
+        val viewModelFactory = MainViewModelFactory(repository, dataStore)
         viewModel = ViewModelProvider(this, viewModelFactory).get(MainViewModel::class.java)
-        //viewModel.getSvatek()
 
         installSplashScreen().apply {
-           setKeepVisibleCondition{
-               viewModel.isLoading.value
-           }
+            setKeepOnScreenCondition {
+                viewModel.isLoading.value
+            }
         }
 
         setContentView(R.layout.activity_main)
@@ -43,9 +44,8 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun replaceFragment(fragment: Fragment){
-        if (fragment != null)
-        {
+    private fun replaceFragment(fragment: Fragment) {
+        if (fragment != null) {
             val transation = supportFragmentManager.beginTransaction()
             transation.replace(R.id.fragment_container, fragment)
             transation.commit()
