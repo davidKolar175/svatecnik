@@ -1,25 +1,19 @@
 package com.example.svatecnik
 
-import android.util.Log
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
 import com.example.svatecnik.model.NameObject
 import com.example.svatecnik.repository.Repository
 import com.example.svatecnik.utils.Constants.Companion.FAVOURITE_NAMES_KEY
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
-
 
 class MainViewModel(
     private val repository: Repository,
@@ -28,33 +22,50 @@ class MainViewModel(
 
     private val _isLoading = MutableStateFlow(true)
     val isLoading = _isLoading.asStateFlow()
-    val myResponse: MutableLiveData<NameObject> = MutableLiveData()
-    val fakeNames: MutableLiveData<MutableList<String>> = MutableLiveData()
-
-
-    lateinit var lastPlayedSong: Flow<Set<String>>
+    val svatekResponse: MutableLiveData<NameObject> = MutableLiveData()
+    val favouriteNames: MutableLiveData<Set<String>> = MutableLiveData()
+    val isHomeFragmentShow: MutableLiveData<Boolean> = MutableLiveData()
 
     init {
         viewModelScope.launch {
+            isHomeFragmentShow.value = true
             getCurrentSvatek()
-            delay(2000)
+            delay(1500)
             _isLoading.value = false
-            fakeNames.value = mutableListOf("David")
 
-            lastPlayedSong = dataStore.data.map { preferences ->
-                preferences[FAVOURITE_NAMES_KEY] ?: buildSet { "asd" }
+            dataStore.data.map {
+                it[FAVOURITE_NAMES_KEY] ?: emptySet()
+            }.collect {
+                favouriteNames.value = it
             }
         }
     }
 
-    fun setFakeName() {
+    fun deleteFavouriteNames() {
         viewModelScope.launch {
+            dataStore.edit {
+                it[FAVOURITE_NAMES_KEY] = emptySet()
+            }
+        }
+    }
 
-            //fakeNames.value = mutableListOf("Igor")
-            dataStore.edit { settings ->
-                settings[FAVOURITE_NAMES_KEY] = buildSet { "Igor" }
+    fun addNewFavouriteName(newName: String) {
+        viewModelScope.launch {
+            val currentFavouriteNames = favouriteNames.value
+            val newMutableSet = mutableSetOf<String>()
+
+            if (currentFavouriteNames?.contains(newName) == true)
+                newMutableSet.addAll(currentFavouriteNames.filter { x -> x != newName })
+            else if (currentFavouriteNames != null) {
+                newMutableSet.addAll(currentFavouriteNames.toSet())
+                newMutableSet.add(newName)
             }
 
+            dataStore.edit { settings ->
+                val immutableSet: Set<String> = newMutableSet.toSet()
+                settings[FAVOURITE_NAMES_KEY] = immutableSet
+                favouriteNames.value = immutableSet
+            }
         }
     }
 
@@ -65,9 +76,9 @@ class MainViewModel(
             val response = repository.getSvatek(buildMap { put("date", currentDate) })
 
             if (response.isNotEmpty())
-                myResponse.value = response.first();
+                svatekResponse.value = response.first();
             else
-                myResponse.value = null
+                svatekResponse.value = null
         }
     }
 
@@ -76,9 +87,9 @@ class MainViewModel(
             val response = repository.getSvatek(buildMap { put("name", name) })
 
             if (response.isNotEmpty())
-                myResponse.value = response.first();
+                svatekResponse.value = response.first();
             else
-                myResponse.value = null
+                svatekResponse.value = null
         }
     }
 
@@ -87,9 +98,9 @@ class MainViewModel(
             val response = repository.getSvatek(buildMap { put("date", date) })
 
             if (response.isNotEmpty())
-                myResponse.value = response.first();
+                svatekResponse.value = response.first();
             else
-                myResponse.value = null
+                svatekResponse.value = null
         }
     }
 }
