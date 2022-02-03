@@ -47,7 +47,7 @@
                 android:layout_marginHorizontal="20dp"
                 android:gravity="center"
                 android:text="Svátek"
-                android:textSize="22pt" />
+                android:textSize="24pt" />
         </LinearLayout>
 
         <EditText
