@@ -36,7 +36,12 @@ class HomeFragment : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         viewModel = ViewModelProvider(requireActivity()).get(MainViewModel::class.java)
-        viewModel.myResponse.observe(this, Observer { response -> today_name_text.text = formatDisplayedName(response.name, response.date)})
+        viewModel.myResponse.observe(this, Observer { response ->
+            if (response == null)
+                today_name_text.text = "Nepodařilo se nalézt dané jméno!"
+            else
+                today_name_text.text = formatDisplayedName(response.name, response.date)
+        })
 
         arguments?.let {
             param1 = it.getString(ARG_PARAM1)
@@ -62,6 +67,7 @@ class HomeFragment : Fragment() {
                 calendar.set(year, monthOfYear, dayOfMonth)
                 var dateString: String? = sdf.format(calendar.time)
                 if (dateString != null) {
+                    today_name_text.text = "Načítání..."
                     viewModel.getSvatekByDate(dateString)
                     name_input.text.clear()
                 }
@@ -72,6 +78,7 @@ class HomeFragment : Fragment() {
 
         name_input.setOnEditorActionListener { v, actionId, event ->
             if (actionId == EditorInfo.IME_ACTION_DONE) {
+                today_name_text.text = "Načítání..."
                 viewModel.getSvatekByName(v.text.toString())
             }
             false

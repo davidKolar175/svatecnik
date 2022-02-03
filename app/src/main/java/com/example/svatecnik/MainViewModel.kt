@@ -63,21 +63,33 @@ class MainViewModel(
             val sdf = SimpleDateFormat("ddMM")
             val currentDate = sdf.format(Date())
             val response = repository.getSvatek(buildMap { put("date", currentDate) })
-            myResponse.value = response.first();
+
+            if (response.isNotEmpty())
+                myResponse.value = response.first();
+            else
+                myResponse.value = null
         }
     }
 
     fun getSvatekByName(name: String) {
         viewModelScope.launch {
             val response = repository.getSvatek(buildMap { put("name", name) })
-            myResponse.value = response.first();
+
+            if (response.isNotEmpty())
+                myResponse.value = response.first();
+            else
+                myResponse.value = null
         }
     }
 
     fun getSvatekByDate(date: String) {
         viewModelScope.launch {
             val response = repository.getSvatek(buildMap { put("date", date) })
-            myResponse.value = response.first();
+
+            if (response.isNotEmpty())
+                myResponse.value = response.first();
+            else
+                myResponse.value = null
         }
     }
 }

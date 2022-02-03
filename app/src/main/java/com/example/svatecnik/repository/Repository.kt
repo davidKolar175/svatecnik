@@ -10,7 +10,6 @@ class Repository {
     suspend fun getSvatek(params: Map<String, String>): List<NameObject> {
         return try {
             RetrofitInstance.api.getSvatek(params)
-
         } catch (e: Exception)  {
             return emptyList()
         }
